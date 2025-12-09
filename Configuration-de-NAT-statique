@@ -1,0 +1,45 @@
+! ===========================================================
+! GOAL:
+! PC1 (10.10.10.2) must reach Router2 using static NAT.
+! It will be translated to the public IP 20.20.20.3.
+! ===========================================================
+
+
+! ============================
+! ROUTER 1 – LAN + NAT
+! ============================
+
+! ---- LAN Interface ----
+interface e0/0
+ ip address 10.10.10.1 255.255.255.0
+ ip nat inside
+ no shutdown
+exit
+
+! ---- WAN Interface ----
+interface e0/1
+ ip address 20.20.20.1 255.255.255.0
+ ip nat outside
+ no shutdown
+exit
+
+! ---- DHCP Server (optional) ----
+ip dhcp excluded-address 10.10.10.1
+ip dhcp pool dhcp_pool1
+ network 10.10.10.0 255.255.255.0
+ default-router 10.10.10.1
+exit
+
+! ---- STATIC NAT MAPPING ----
+! Map inside-local  (10.10.10.2)
+! To inside-global  (20.20.20.3)
+ip nat inside source static 10.10.10.2 20.20.20.3
+
+
+! ============================
+! ROUTER 2 – WAN Side
+! ============================
+interface e0/0
+ ip address 20.20.20.2 255.255.255.0
+ no shutdown
+exit
